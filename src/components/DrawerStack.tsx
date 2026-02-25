@@ -7,6 +7,7 @@ import OrdersScreen from "../screens/OrdersScreen";
 import ContactScreen from "../screens/ContactScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import CustomDrawer from "../components/CustomDrawer";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -25,6 +26,7 @@ export default function DrawerStack() {
       <Drawer.Screen name="Orders" component={OrdersScreen} />
       <Drawer.Screen name="Contact" component={ContactScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
     </Drawer.Navigator>
   );
 }

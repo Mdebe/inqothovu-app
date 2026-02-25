@@ -5,13 +5,32 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import { getAuth, signOut } from "firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 
 export default function CustomDrawer(props: any) {
+  const navigation: any = useNavigation();
+  const auth = getAuth();
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await signOut(auth);
+          navigation.replace("Login");
+        },
+      },
+    ]);
+  };
+
   return (
     <DrawerContentScrollView {...props}>
-      
       {/* Drawer Header */}
       <View style={styles.header}>
         <Image
@@ -25,8 +44,8 @@ export default function CustomDrawer(props: any) {
       {/* Drawer Items */}
       <DrawerItemList {...props} />
 
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton}>
+      {/* Logout */}
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </DrawerContentScrollView>

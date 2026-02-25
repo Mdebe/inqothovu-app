@@ -1,8 +1,8 @@
 import React from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { CartProvider } from "./src/context/CartContext";
 
@@ -14,6 +14,7 @@ import CartScreen from "./src/screens/CartScreen";
 import OrdersScreen from "./src/screens/OrdersScreen";
 import ContactScreen from "./src/screens/ContactScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
 
 // Navigation
 import BottomTabs from "./src/navigation/BottomTabs";
@@ -32,12 +33,12 @@ function DrawerStack() {
         drawerInactiveTintColor: "#010a33",
       }}
     >
-      {/* Main shop tabs */}
       <Drawer.Screen name="Shop" component={BottomTabs} />
       <Drawer.Screen name="Cart" component={CartScreen} />
       <Drawer.Screen name="Orders" component={OrdersScreen} />
       <Drawer.Screen name="Contact" component={ContactScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
+      <Drawer.Screen name="Profile" component={ProfileScreen} />
     </Drawer.Navigator>
   );
 }
@@ -48,7 +49,6 @@ export default function App() {
       <CartProvider>
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
-            {/* Splash → Login → Signup → DrawerStack */}
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
