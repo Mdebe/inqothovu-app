@@ -20,7 +20,7 @@ jobs:
           node-version: 20
 
       - name: Install Expo CLI
-        run: npm install -g expo-cli
+        run: npm install -g expo-cli eas-cli
 
       - name: Install dependencies
         run: npm install
@@ -28,15 +28,15 @@ jobs:
       - name: Login to Expo
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: expo login --token $EXPO_TOKEN
+        run: eas whoami || eas login --token $EXPO_TOKEN
 
       - name: Build Android APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: eas build --platform android --profile production --non-interactive
 
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: apk
-          path: dist/*.apk
+          path: dist/**/*.apk
