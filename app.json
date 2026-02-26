@@ -1,5 +1,6 @@
 {
   "expo": {
+    "owner": "mfundo_iphisi",
     "name": "inqothovu-app",
     "slug": "inqothovu-app",
     "version": "1.0.0",
@@ -29,7 +30,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "e1677dfe-460c-4194-8272-5de28a1c77ab"
+        "projectId": "1130ac57-d6ae-4f7e-bee7-9adcb774c5b7"
       }
     }
   }
