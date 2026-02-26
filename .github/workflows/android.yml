@@ -14,28 +14,44 @@ jobs:
       EAS_BUILD_NO_EXPO_GO_WARNING: true
 
     steps:
+      # 1️⃣ Checkout the repo
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup Node 20
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
 
+      # 3️⃣ Install Expo & EAS CLI globally
       - name: Install Expo & EAS CLI
         run: npm install -g expo-cli eas-cli
 
+      # 4️⃣ Install dependencies cleanly
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Login to Expo
-        run: eas login --token $EXPO_TOKEN
-
+      # 5️⃣ Build Android APK
       - name: Build Android APK
-        run: eas build --platform android --profile production --non-interactive
+        run: |
+          eas build --platform android --profile production --non-interactive --output ./build/apk --type apk
 
+      # 6️⃣ Build Android AAB (Play Store bundle)
+      - name: Build Android AAB
+        run: |
+          eas build --platform android --profile production --non-interactive --output ./build/aab --type aab
+
+      # 7️⃣ Upload APK artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: apk
-          path: "**/*.apk"
+          name: apk-${{ github.sha }}
+          path: ./build/apk/**/*.apk
+
+      # 8️⃣ Upload AAB artifact
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: aab-${{ github.sha }}
+          path: ./build/aab/**/*.aab
