@@ -1,31 +1,68 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  TextInput,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { getAuth, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../config/firebase"; // your Firestore config
+import { getAuth, signOut, updateProfile, User } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../config/firebase";
+import AppBar from "../components/AppBar";
+import BottomNav from "../navigation/BottomTabs"; // <- import your custom BottomNav
 
 export default function ProfileScreen() {
   const navigation: any = useNavigation();
   const auth = getAuth();
-  const currentUser = auth.currentUser;
+  const currentUser: User | null = auth.currentUser;
 
-  const [userData, setUserData] = useState<any>(null);
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (currentUser) {
-      const userRef = doc(db, "users", currentUser.uid);
-      getDoc(userRef)
-        .then((docSnap) => {
-          if (docSnap.exists()) {
-            setUserData(docSnap.data());
-          }
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+    if (!currentUser) {
+      navigation.replace("Login");
+      return;
     }
+
+    const loadData = async () => {
+      setLoading(true);
+      const userRef = doc(db, "users", currentUser.uid);
+      try {
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data() as any);
+        } else {
+          setUserData({
+            name: currentUser.displayName || "",
+            email: currentUser.email || "",
+            phone: "",
+            address: "",
+          });
+        }
+      } catch (err: any) {
+        Alert.alert("Error", err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [currentUser]);
 
   const handleLogout = () => {
@@ -43,42 +80,126 @@ export default function ProfileScreen() {
     ]);
   };
 
-  if (loading) return <Text style={styles.loadingText}>Loading profile...</Text>;
+  const handleSave = async () => {
+    if (!currentUser) return;
+
+    if (!userData.name || !userData.email) {
+      Alert.alert("Missing Fields", "Name and Email are required.");
+      return;
+    }
+
+    setSaving(true);
+    const userRef = doc(db, "users", currentUser.uid);
+
+    try {
+      await setDoc(userRef, userData, { merge: true });
+
+      if (currentUser.displayName !== userData.name) {
+        await updateProfile(currentUser, { displayName: userData.name });
+      }
+
+      Alert.alert("Success", "Profile updated successfully.");
+      setEditing(false);
+    } catch (err: any) {
+      Alert.alert("Error", err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#d41ed3" style={{ marginTop: 100 }} />;
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Avatar */}
-      <Image
-        source={require("../../assets/images/hero.jpg")}
-        style={styles.avatar}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      {/* Top AppBar */}
+      <AppBar title="Profile" onMenuPress={() => navigation.openDrawer()} />
 
-      {/* User Info */}
-      <Text style={styles.name}>{userData?.name || currentUser?.displayName || "User Name"}</Text>
-      <Text style={styles.email}>{userData?.email || currentUser?.email}</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Avatar */}
+        <Image
+          source={require("../../assets/images/hero.jpg")}
+          style={styles.avatar}
+        />
 
-      {/* User Details Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account Details</Text>
-        <Text style={styles.detailText}>Phone: {userData?.phone || "Not provided"}</Text>
-        <Text style={styles.detailText}>Address: {userData?.address || "Not provided"}</Text>
-      </View>
+        {/* Editable Fields */}
+        <TextInput
+          style={[styles.input, !editing && styles.disabledInput]}
+          value={userData.name}
+          onChangeText={(text) => setUserData({ ...userData, name: text })}
+          placeholder="Full Name"
+          placeholderTextColor="#888"
+          editable={editing}
+        />
+        <TextInput
+          style={[styles.input, !editing && styles.disabledInput]}
+          value={userData.email}
+          onChangeText={(text) => setUserData({ ...userData, email: text })}
+          placeholder="Email"
+          placeholderTextColor="#888"
+          keyboardType="email-address"
+          editable={editing}
+        />
+        <TextInput
+          style={[styles.input, !editing && styles.disabledInput]}
+          value={userData.phone}
+          onChangeText={(text) => setUserData({ ...userData, phone: text })}
+          placeholder="Phone Number"
+          placeholderTextColor="#888"
+          keyboardType="phone-pad"
+          editable={editing}
+        />
+        <TextInput
+          style={[styles.input, !editing && styles.disabledInput]}
+          value={userData.address}
+          onChangeText={(text) => setUserData({ ...userData, address: text })}
+          placeholder="Address"
+          placeholderTextColor="#888"
+          editable={editing}
+        />
 
-      {/* Orders */}
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Orders")}>
-        <Text style={styles.buttonText}>My Orders</Text>
-      </TouchableOpacity>
+        {/* Buttons */}
+        {editing ? (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save Profile</Text>}
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => setEditing(true)}
+          >
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </TouchableOpacity>
+        )}
+        {/* Notifications Card */}
+<TouchableOpacity
+  style={styles.notificationCard}
+  onPress={() => navigation.navigate("Messages")}
+>
+  <Text style={styles.notificationTitle}>Messages / Notifications</Text>
+  <Text style={styles.notificationCount}>{/* You can show unread count */}</Text>
+</TouchableOpacity>
 
-      {/* Settings */}
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Settings")}>
-        <Text style={styles.buttonText}>Settings</Text>
-      </TouchableOpacity>
+        {/* Logout */}
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#ff4d4d" }]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.buttonText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
 
-      {/* Logout */}
-      <TouchableOpacity style={[styles.button, { backgroundColor: "#ff4d4d" }]} onPress={handleLogout}>
-        <Text style={styles.buttonText}>Logout</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      {/* Use your custom BottomNav */}
+       
+    </KeyboardAvoidingView>
   );
 }
 
@@ -87,14 +208,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 20,
     paddingHorizontal: 20,
-  },
-  loadingText: {
-    marginTop: 100,
-    fontSize: 18,
-    color: "#555",
-    textAlign: "center",
+    paddingBottom: 80, // leave space for bottom nav
   },
   avatar: {
     width: 120,
@@ -102,32 +218,17 @@ const styles = StyleSheet.create({
     borderRadius: 60,
     marginBottom: 15,
   },
-  name: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#d41ed3",
-  },
-  email: {
-    color: "#6c6c6c",
-    marginBottom: 30,
-  },
-  section: {
+  input: {
     width: "100%",
-    backgroundColor: "#f7f7f7",
-    padding: 20,
+    backgroundColor: "#f4f4f4",
+    padding: 14,
     borderRadius: 16,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#d41ed3",
-    marginBottom: 10,
-  },
-  detailText: {
+    marginBottom: 16,
     fontSize: 16,
-    color: "#555",
-    marginBottom: 6,
+    color: "#000",
+  },
+  disabledInput: {
+    backgroundColor: "#e0e0e0",
   },
   button: {
     width: "100%",
@@ -147,4 +248,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  notificationCard: {
+  width: "100%",
+  backgroundColor: "#f4f4f4",
+  padding: 16,
+  borderRadius: 16,
+  marginVertical: 10,
+},
+notificationTitle: {
+  fontSize: 16,
+  fontWeight: "bold",
+  color: "#d41ed3",
+},
+notificationCount: {
+  fontSize: 14,
+  color: "#555",
+  marginTop: 4,
+},
+
 });

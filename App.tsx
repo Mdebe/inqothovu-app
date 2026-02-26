@@ -19,6 +19,7 @@ import ProfileScreen from "./src/screens/ProfileScreen";
 // Navigation
 import BottomTabs from "./src/navigation/BottomTabs";
 import CustomDrawer from "./src/components/CustomDrawer";
+import MessagesScreen from "./src/screens/MessagesScreen";
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -39,6 +40,7 @@ function DrawerStack() {
       <Drawer.Screen name="Contact" component={ContactScreen} />
       <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="Messages" component={MessagesScreen} />
     </Drawer.Navigator>
   );
 }

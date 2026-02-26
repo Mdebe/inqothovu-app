@@ -1,40 +1,20 @@
 import React from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  ToastAndroid,
-  Alert,
-} from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from "react-native";
 import AppBar from "../components/AppBar";
 import { useNavigation } from "@react-navigation/native";
 import { useCart, Product } from "../context/CartContext";
 
+// Each product now starts with quantity = 1
 const products: Product[] = [
-  { name: "Car Diffuser", price: 50, img: require("../../assets/images/hero.jpg") },
-  { name: "House Diffuser", price: 200, img: require("../../assets/images/hero.jpg") },
-  { name: "Roll-on Perfume", price: 30, img: require("../../assets/images/hero.jpg") },
-  { name: "Luxury Perfume", price: 100, img: require("../../assets/images/hero.jpg") },
+  { name: "Car Diffuser", price: 50, img: require("../../assets/images/hero.jpg"), quantity: 1 },
+  { name: "House Diffuser", price: 200, img: require("../../assets/images/hero.jpg"), quantity: 1 },
+  { name: "Roll-on Perfume", price: 30, img: require("../../assets/images/hero.jpg"), quantity: 1 },
+  { name: "Luxury Perfume", price: 100, img: require("../../assets/images/hero.jpg"), quantity: 1 },
 ];
 
 export default function ProductsScreen() {
   const navigation: any = useNavigation();
   const { addToCart } = useCart();
-
-  const handleAddToCart = (item: Product) => {
-    addToCart(item);
-
-    // Notify user
-    if (Platform.OS === "android") {
-      ToastAndroid.show(`${item.name} added to cart!`, ToastAndroid.SHORT);
-    } else {
-      Alert.alert("Added to Cart", `${item.name} has been added to your cart.`);
-    }
-  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -49,7 +29,7 @@ export default function ProductsScreen() {
 
             <TouchableOpacity
               style={styles.button}
-              onPress={() => handleAddToCart(item)}
+              onPress={() => addToCart(item)}
             >
               <Text style={styles.buttonText}>Add to Cart</Text>
             </TouchableOpacity>

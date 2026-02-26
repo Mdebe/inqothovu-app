@@ -5,6 +5,7 @@ export type Product = {
   name: string;
   price: number;
   img: any;
+  quantity: number; // Correct type: number, not JSX.Element
 };
 
 // Context value type
@@ -28,8 +29,18 @@ export const useCart = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Product[]>([]);
 
+  // Add product to cart
   const addToCart = (product: Product) => {
-    setCart((prev) => [...prev, product]);
+    // Check if product already exists; if so, increment quantity
+    setCart((prev) => {
+      const existingIndex = prev.findIndex((p) => p.name === product.name);
+      if (existingIndex !== -1) {
+        const updated = [...prev];
+        updated[existingIndex].quantity += product.quantity;
+        return updated;
+      }
+      return [...prev, product];
+    });
   };
 
   const removeFromCart = (index: number) => {
@@ -38,7 +49,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => setCart([]);
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <CartContext.Provider

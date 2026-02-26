@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
@@ -23,9 +24,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const validateEmail = (email: string) => {
-    return /\S+@\S+\.\S+/.test(email);
-  };
+  const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -40,15 +39,8 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-
-      await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
+      await signInWithEmailAndPassword(auth, email.trim(), password);
       navigation.replace("HomeDrawer");
-
     } catch (error: any) {
       Alert.alert("Login Failed", error.message);
     } finally {
@@ -77,13 +69,21 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.container}>
-          
-          <Text style={styles.logo}>Inqothovu</Text>
+
+          {/* Logo */}
+          <Image
+            source={require("../../assets/images/logo.png")} // <-- replace with your logo path
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+
+          <Text style={styles.logoText}>Inqothovu</Text>
           <Text style={styles.title}>Welcome Back 👋</Text>
           <Text style={styles.subtitle}>Login to continue shopping</Text>
 
           <TextInput
             placeholder="Email Address"
+            placeholderTextColor="#888"
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -93,6 +93,7 @@ export default function LoginScreen() {
 
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#888"
             value={password}
             onChangeText={setPassword}
             style={styles.input}
@@ -128,9 +129,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           {/* Signup Link */}
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Signup")}
-          >
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
             <Text style={styles.linkText}>
               Don’t have an account? <Text style={{ fontWeight: "bold" }}>Sign Up</Text>
             </Text>
@@ -156,7 +155,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#fff",
   },
-  logo: {
+  logoImage: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  logoText: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#d41ed3",
@@ -179,6 +184,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
     fontSize: 16,
+    color: "#000", // <-- ensures text is visible on mobile
   },
   row: {
     flexDirection: "row",

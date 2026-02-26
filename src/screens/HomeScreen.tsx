@@ -26,10 +26,22 @@ const categories = [
 ];
 
 const products: Product[] = [
-  { name: "Car Diffuser", price: 50, img: require("../../assets/images/hero.jpg") },
-  { name: "House Diffuser", price: 200, img: require("../../assets/images/hero.jpg") },
-  { name: "Roll-On Perfume", price: 30, img: require("../../assets/images/hero.jpg") },
-  { name: "Luxury Perfume", price: 100, img: require("../../assets/images/hero.jpg") },
+  {
+      name: "Car Diffuser", price: 50, img: require("../../assets/images/hero.jpg"),
+      quantity: 1
+  },
+  {
+      name: "House Diffuser", price: 200, img: require("../../assets/images/hero.jpg"),
+      quantity: 1
+  },
+  {
+      name: "Roll-On Perfume", price: 30, img: require("../../assets/images/hero.jpg"),
+      quantity: 1
+  },
+  {
+      name: "Luxury Perfume", price: 100, img: require("../../assets/images/hero.jpg"),
+      quantity: 1
+  },
 ];
 
 export default function HomeScreen() {
